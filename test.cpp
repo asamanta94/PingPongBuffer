@@ -4,7 +4,7 @@
 
 using namespace std;
 
-ping_pong * pp;
+ping_pong<int> * pp;
 bool done = false;
 
 void * reader(void * data)
@@ -12,7 +12,7 @@ void * reader(void * data)
     int * i = new int;
     while( *i != 9 )
     {
-        pp->read(reinterpret_cast<uint8_t **>(&i));
+        pp->read(&i);
         cout << *i << endl;
         usleep(1000);
     }
@@ -24,7 +24,7 @@ void * writer(void * data)
 {
     for(int i = 0; i < 10; i++)
     {
-        pp->write(reinterpret_cast<uint8_t *>(&i));
+        pp->write(&i);
         usleep(10000);
     }
     
@@ -35,7 +35,7 @@ void * writer(void * data)
 
 int main(int argc, char * argv[])
 {
-    pp = new ping_pong(sizeof(int));
+    pp = new ping_pong<int>();
  
     pthread_t r_id;
     pthread_t w_id;
