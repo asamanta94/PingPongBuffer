@@ -12,7 +12,7 @@ void * reader(void * data)
     int * i = new int;
     while( *i != 9 )
     {
-        pp->read(reinterpret_cast<uint8_t **>(&i));
+        pp->read(reinterpret_cast<uint8_t *>(i));
         cout << *i << endl;
         usleep(1000);
     }

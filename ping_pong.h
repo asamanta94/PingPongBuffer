@@ -5,6 +5,13 @@
 #include <stdint.h>
 #include <pthread.h>
 
+enum status_t
+{
+    STATUS_OK = 0,
+    ERROR_NO_DATA,
+    ERROR_EMPTY_MEM
+};
+
 class ping_pong
 {
     uint8_t * _slots[2];
@@ -21,8 +28,8 @@ class ping_pong
         ping_pong(size_t size);
         ~ping_pong();
 
-        void read(uint8_t ** data);
-        void write(uint8_t * data);
+        status_t read(uint8_t * data);
+        status_t write(uint8_t * data);
         void swap();
 };
 

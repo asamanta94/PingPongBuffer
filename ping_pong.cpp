@@ -3,6 +3,9 @@
 
 using namespace std;
 
+/** Constructor 
+ *  @param size - Size of data that needs 
+ *                to be stored. */
 ping_pong::ping_pong(size_t size)
 {
     if( size <= 0 )
@@ -22,6 +25,7 @@ ping_pong::ping_pong(size_t size)
     pthread_mutex_init(&_lock[1], nullptr);
 }
 
+/** Destructor */
 ping_pong::~ping_pong()
 {
     _slot_size = -1;
@@ -38,7 +42,11 @@ ping_pong::~ping_pong()
     delete _slots[1];
 }
 
-void ping_pong::read(uint8_t ** data)
+/** Function to read data from the buffer
+ *  @param data - Pointer to location where
+*                 data needs to be copied to.
+ */
+status_t ping_pong::read(uint8_t * data)
 {
     pthread_mutex_lock(&_lock[_read_index]);
     
@@ -46,19 +54,29 @@ void ping_pong::read(uint8_t ** data)
     {
         pthread_mutex_unlock(&_lock[_read_index]);
         cout << "nothing to read\n";
-        return;
+        return ERROR_EMPTY_MEM;
     }
-    
-    if( *data == nullptr )
-        *data = new uint8_t[_slot_size];   
         
-    memcpy(*data, _slots[_read_index], _slot_size);
+    if( data == nullptr )
+    {
+        pthread_mutex_unlock(&_lock[_read_index]);
+        cout << "allocate memory\n";
+        return ERROR_EMPTY_MEM;
+    }
+        
+    memcpy(data, _slots[_read_index], _slot_size);
     _slot_has_data[_read_index] = false;
     
     pthread_mutex_unlock(&_lock[_read_index]);
+    
+    return STATUS_OK;
 }
 
-void ping_pong::write(uint8_t * data)
+/** Function to write data to the buffer
+ *  @param data - Pointer to data which needs
+ *                to be written to buffer.
+ */
+status_t ping_pong::write(uint8_t * data)
 {
     pthread_mutex_lock(&_lock[1 - _read_index]);
     
@@ -66,7 +84,7 @@ void ping_pong::write(uint8_t * data)
     {
         pthread_mutex_unlock(&_lock[1 - _read_index]);
         cout << "nothing to write\n";
-        return;
+        return ERROR_NO_DATA;
     }
     
     memcpy(_slots[1 - _read_index], data, _slot_size);
@@ -74,8 +92,11 @@ void ping_pong::write(uint8_t * data)
     swap();
     
     pthread_mutex_unlock(&_lock[_read_index]);
+    
+    return STATUS_OK;
 }
 
+/** Function to swap read and write pointers. */
 void ping_pong::swap()
 {
     pthread_mutex_lock(&_lock[_read_index]);
