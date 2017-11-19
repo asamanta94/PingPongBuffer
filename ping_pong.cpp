@@ -25,6 +25,17 @@ ping_pong::ping_pong(size_t size)
 ping_pong::~ping_pong()
 {
     _slot_size = -1;
+    
+    _slot_has_data[0] = false;
+    _slot_has_data[1] = false;
+    
+    _read_index = -1;
+    
+    pthread_mutex_destroy(&_lock[0]);
+    pthread_mutex_destroy(&_lock[1]);
+    
+    delete _slots[0];
+    delete _slots[1];
 }
 
 void ping_pong::read(uint8_t ** data)
